@@ -41,7 +41,7 @@ A lightweight, Shepard-style study tool for **Outdoor Emergency Care (OEC)** pre
 4) **Use it**
    - Import a deck from the left sidebar (**Replace deck on import** if you want to overwrite)
    - Click **Start / Continue** and drill
-   - Missed? use **See it again**. Nailed it? **I knew it**
+   - Missed? Use **See it again**. Nailed it? **I knew it**
    - **Export All** to save an upgraded deck JSON (with cleaner explanations)
 
 > Opening `index.html` directly with `file://` sometimes limits browser features—using a local server is recommended.

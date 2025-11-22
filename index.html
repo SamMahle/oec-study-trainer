@@ -1,0 +1,547 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OEC Study Trainer — Fixed</title>
+  <style>
+    :root{ --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb;
+           --accent:#22c55e; --danger:#ef4444; --warn:#f59e0b; --border:#1f2937; }
+/* THEME: light overrides */
+.light{
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --muted:#334155;
+  --text:#0b1223;
+  --accent:#15803d;
+  --danger:#b91c1c;
+  --warn:#b45309;
+  --border:#cbd5e1;
+}
+.light body{ background:var(--bg); color:var(--text); }
+.light .pill{ background:#eef2f7; color:#0b1223; border-color:var(--border) }
+.light .card{ background:var(--card); border-color:var(--border) }
+.light button{ background:#ffffff; border-color:var(--border); color:#0b1223 }
+.light button:hover{ border-color:#94a3b8 }
+.light select, .light input, .light textarea{ background:#ffffff; border-color:var(--border); color:#0b1223 }
+.light .choice{ background:#ffffff; border-color:var(--border) }
+.light .question{ background:#ffffff; border-color:#d1d5db; color:#0b1223 }
+.light .explain{ background:#f8fafc; border-left-color:#94a3b8; color:#0b1223 }
+
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;background:#0b1223;color:var(--text)}
+    header{max-width:1100px;margin:0 auto;padding:16px 16px 0 16px}
+    h1{margin:0;font-size:22px}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px;display:grid;grid-template-columns:340px 1fr;gap:16px}
+    @media(max-width:980px){.wrap{grid-template-columns:1fr}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:#0b1223;color:var(--muted)}
+    button{appearance:none;border:1px solid var(--border);background:#0b1223;color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600}
+    button:hover{border-color:#334155}
+    .btn-accent{background:#0b1f14;border-color:#164e3f}
+    .btn-danger{background:#220d0d;border-color:#5c1515}
+    .btn-warn{background:#241a08;border-color:#6b4d0d}
+    select,input,textarea{width:100%;padding:10px;border-radius:12px;border:1px solid var(--border);background:#0b1223;color:var(--text)}
+    .question{padding:16px;border:1px dashed #334155;border-radius:12px;background:#0b1223;font-size:20px;line-height:1.45}
+    .choices{margin-top:10px;display:grid;gap:8px}
+    .choice{display:grid;grid-template-columns:22px 28px 1fr;column-gap:12px;align-items:start;background:#0d1426;border:1px solid #1e293b;padding:14px;border-radius:12px;cursor:pointer}
+    .choice:hover{border-color:#334155}
+    .choice input[type="radio"]{margin-top:4px;transform:scale(1.0)}
+    .choice .letter{width:28px;height:28px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #334155;font-weight:800;font-size:12px;background:#0b1223;color:#cbd5e1}
+    .choice .text{line-height:1.45}
+    .explain{margin-top:12px;padding:12px;border-left:3px solid #334155;background:#0c1221;border-radius:10px;color:#cbd5e1}
+    .hidden{display:none}
+    .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+    .kpi .chip{background:#0b1223;border:1px solid var(--border);padding:10px;border-radius:12px;text-align:center;font-weight:700}
+.light .kpi .chip{background:#ffffff;border-color:var(--border);color:var(--text)}
+.light .kpi .chip .pill{background:#eef2f7;color:#0b1223;border-color:var(--border)}
+    .progress{height:10px;background:#0b1223;border:1px solid var(--border);border-radius:999px;overflow:hidden;margin-top:8px}
+    .progress>div{height:100%;width:0;background:linear-gradient(90deg,#22c55e,#16a34a)}
+    .replace-label{display:flex;gap:10px;align-items:center;margin-top:10px}
+    .replace-label input[type="checkbox"]{width:18px;height:18px}
+    .replace-text{text-transform:uppercase;letter-spacing:.08em;color:#cbd5e1;font-size:14px}
+  .light .chip{background:#ffffff !important; color:#0b1223 !important; border-color:var(--border) !important}
+</style>
+</head>
+<body>
+  <header>
+    <h1>OEC Study Trainer — Clean Build</h1>
+<button id="themeToggle" class="pill" style="margin-top:8px">🌙 Dark</button>
+    <div class="pill">Sheppard-style: miss → see again, correct → Known</div>
+  </header>
+
+  <div class="wrap">
+    <aside class="card">
+      <div class="row" style="justify-content:space-between">
+        <span class="pill">Deck: <strong id="deckCount">0</strong></span>
+        <span class="pill">Queue: <strong id="queueCount">0</strong></span>
+      </div>
+
+      <div style="height:8px"></div>
+
+      <div class="row">
+        <label class="pill">Mode: <strong id="modeBadge">Learn</strong></label>
+        <button id="modeLearn">Learn</button>
+        <button id="modeExam">Exam</button>
+      </div>
+
+      <div style="height:8px"></div>
+
+      <div class="row">
+        <div style="flex:1">
+          <label class="pill">Category</label>
+          <select id="categoryFilter"><option value="all">All</option></select>
+        </div>
+        <div style="flex:1">
+          <label class="pill">Order</label>
+          <select id="orderSel">
+            <option value="shuffle">Shuffle</option>
+            <option value="byCat">By category</option>
+            <option value="original">Original</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="kpi">
+        <div class="chip"><div class="pill" style="justify-content:center">Known</div><div id="kKnown">0</div></div>
+        <div class="chip"><div class="pill" style="justify-content:center">Unknown</div><div id="kUnknown">0</div></div>
+        <div class="chip"><div class="pill" style="justify-content:center">Accuracy</div><div id="kAcc">0%</div></div>
+      </div>
+      <div class="progress"><div id="progBar"></div></div>
+
+      <div style="height:8px"></div>
+
+      <div class="row">
+        <button class="btn-accent" id="btnStart">Start / Continue</button>
+        <button id="btnReset">Reset progress</button>
+        <button class="btn-warn" id="btnReviewWrong">Drill Unknown</button>
+      </div>
+
+      <div style="height:12px"></div>
+
+      <div>
+        <label class="pill">Import / Export</label>
+        <input type="file" id="fileInput" accept=".json,.csv"/>
+        <div id="importStatus" class="pill" style="margin-top:8px;white-space:pre-wrap"></div>
+        <label class="replace-label"><input type="checkbox" id="replaceChk"><span class="replace-text">REPLACE DECK ON IMPORT</span></label>
+        <div class="row" style="margin-top:8px">
+          <button id="btnImport">Import</button>
+          <button id="btnExportUnknown">Export Unknown</button>
+          <button id="btnExportAll">Export All</button>
+          <button class="btn-danger" id="btnClearDeck">Clear Deck</button>
+        </div>
+
+        <div style="margin-top:12px;color:#94a3b8;font-size:12px">CSV columns: question, choices (use <code>||</code> between choices), answer, explanation, category. JSON: array of cards.</div>
+
+        <div style="margin-top:16px;color:#94a3b8;font-size:12px; text-transform:uppercase; letter-spacing:.08em">Quick Add (one card)</div>
+        <div class="row" style="flex-direction:column;gap:8px;margin-top:8px">
+          <input id="qaQuestion" type="text" placeholder="Question text"/>
+          <input id="qaChoices" type="text" placeholder="Choices (A||B||C) or leave blank for free-response / T-F"/>
+          <input id="qaAnswer" type="text" placeholder="Correct answer (text match, or True/False)"/>
+          <input id="qaExplain" type="text" placeholder="Explanation (optional)"/>
+          <input id="qaCat" type="text" placeholder="Category (e.g., Airway)"/>
+          <button class="btn-accent" id="btnAddCard">Add Card</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="card">
+      <div class="row" style="justify-content:space-between;align-items:center">
+        <div class="pill">Category: <strong id="qCat">—</strong></div>
+        <div class="row">
+          <span class="pill">Seen: <strong id="statSeen">0</strong></span>
+          <span class="pill">Correct: <strong id="statCorrect">0</strong></span>
+          <span class="pill">Wrong: <strong id="statWrong">0</strong></span>
+        </div>
+      </div>
+
+      <div style="height:8px"></div>
+
+      <div class="question" id="qText">Click "Start / Continue" to begin.</div>
+      <div class="choices" id="choicesWrap"></div>
+      <div class="explain hidden" id="feedbackBanner"></div>
+
+      <div style="height:8px"></div>
+
+      <div class="row" style="gap:12px">
+        <button class="btn-accent" id="btnCheck">Check</button>
+        <button class="btn-warn hidden" id="btnNext">Next ▶</button>
+        <button class="btn-danger" id="btnMarkWrong">See it again</button>
+        <button class="btn-accent" id="btnMarkKnown">I knew it</button>
+        <button id="btnShow">Show answer</button>
+        <button id="btnSkip">Skip</button>
+      </div>
+    </main>
+  </div>
+
+  <div class="footer" style="max-width:1100px;margin:10px auto 40px;padding:0 16px;color:#94a3b8;font-size:13px;line-height:1.6">
+    <p><strong>Tip:</strong> "Exam" mode hides the explanation until after you answer. "Learn" mode lets you peek anytime.
+    Your progress is saved in your browser (localStorage). You can import your own decks or expand the starter deck.</p>
+    <p>Built for Ski Patrol OEC prep with original practice questions (not official exam items). You can add your own legitimate practice questions if you have permission.</p>
+  </div>
+
+<script>
+const STORAGE_KEY = "oec_trainer_clean_v2";
+
+let allCards = [];
+let activeQueue = [];
+let currentIndex = null;
+let stats = {seen:0, correct:0, wrong:0, known:new Set(), order:"shuffle", mode:"learn", cat:"all"};
+let wrongBucket = new Set();
+
+const $ = (s)=>document.querySelector(s);
+const $$ = (s)=>Array.from(document.querySelectorAll(s));
+
+function saveState(){
+  const data = { allCards, activeQueue, currentIndex, stats:{...stats, known:[...stats.known]}, wrongBucket:[...wrongBucket] };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  refreshKpis();
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const d = JSON.parse(raw);
+    allCards = d.allCards||[];
+    activeQueue = d.activeQueue||[];
+    currentIndex = d.currentIndex ?? null;
+    stats = d.stats||stats; stats.known = new Set(stats.known||[]);
+    wrongBucket = new Set(d.wrongBucket||[]);
+  }catch(e){ console.warn("load failed", e) }
+  refreshKpis();
+}
+
+function uuid(){ return Math.random().toString(36).slice(2)+Date.now().toString(36) }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } }
+
+function refreshKpis(){
+  const known = stats.known.size;
+  const unknown = allCards.length - known;
+  $("#kKnown").textContent = known;
+  $("#kUnknown").textContent = unknown;
+  $("#kAcc").textContent = stats.seen? Math.round(100*stats.correct/Math.max(1,stats.seen))+"%" : "0%";
+  $("#deckCount").textContent = allCards.length;
+  $("#queueCount").textContent = activeQueue.length;
+  $("#statSeen").textContent = stats.seen;
+  $("#statCorrect").textContent = stats.correct;
+  $("#statWrong").textContent = stats.wrong;
+  $("#modeBadge").textContent = stats.mode==="exam"?"Exam":"Learn";
+  const pct = Math.round(100*known/Math.max(1,allCards.length));
+  $("#progBar").style.width = pct+"%";
+}
+
+function populateCategoryFilter(){
+  const sel = $("#categoryFilter");
+  const cats = Array.from(new Set(allCards.map(c=>c.cat||"General")));
+  sel.innerHTML = `<option value="all">All</option>` + cats.map(c=>`<option value="${c}">${c}</option>`).join("");
+  sel.value = stats.cat || "all";
+}
+
+function applyFilterSort(){
+  let idxs = allCards.map((_,i)=>i);
+  if(stats.cat!=="all") idxs = idxs.filter(i => (allCards[i].cat||"").toLowerCase()===stats.cat.toLowerCase());
+  if(stats.order==="shuffle") shuffle(idxs);
+  if(stats.order==="byCat") idxs.sort((a,b)=> (allCards[a].cat||"").localeCompare(allCards[b].cat||"") || a-b);
+  idxs = idxs.filter(i=> !stats.known.has(allCards[i].id));
+  activeQueue = idxs;
+  $("#queueCount").textContent = activeQueue.length;
+}
+
+function renderQuestion(card){
+  const q = $("#qText"), wrap=$("#choicesWrap"), cat=$("#qCat");
+  const fb=$("#feedbackBanner"); fb.classList.add("hidden"); fb.innerHTML="";
+  if(!card){ q.textContent="Queue empty. Change category, reset, or import a deck."; wrap.innerHTML=""; cat.textContent="—"; return; }
+  cat.textContent = card.cat || "General";
+  q.textContent = card.q;
+  wrap.innerHTML = "";
+  if(card.type==="mc" || card.type==="tf"){
+    const options = (card.type==="tf")? ["True","False"] : (card.choices||[]);
+    options.forEach((opt,idx)=>{
+      const label = document.createElement("label");
+      label.className="choice";
+      const letter = String.fromCharCode(65 + idx);
+      label.innerHTML = `<input type="radio" name="opt" value="${idx}">
+                         <span class="letter">${letter}</span>
+                         <div class="text">${opt}</div>`;
+      label.addEventListener("click", ()=>{ label.querySelector("input").checked=true; });
+      wrap.appendChild(label);
+    });
+  } else {
+    // Free-response not used in this deck, but keep support minimal
+    const input = document.createElement("input");
+    input.type="text"; input.placeholder="Type your answer";
+    input.id="freeInput";
+    wrap.appendChild(input);
+  }
+}
+
+function pickNext(){
+  if(activeQueue.length===0){
+    const wr = allCards.map((c,i)=> wrongBucket.has(c.id)? i:-1).filter(i=>i>=0);
+    if(wr.length){ activeQueue = wr.slice(); shuffle(activeQueue); }
+    else { currentIndex=null; renderQuestion(null); saveState(); return; }
+  }
+  currentIndex = activeQueue.shift();
+  renderQuestion(allCards[currentIndex]);
+  saveState();
+}
+
+function getUserAnswer(card){
+  if(card.type==="mc"||card.type==="tf"){
+    const chk = $$('input[name="opt"]:checked'); if(!chk.length) return null;
+    return parseInt(chk[0].value,10);
+  } else {
+    const el = $("#freeInput"); return el ? el.value.trim() : "";
+  }
+}
+
+function isCorrect(card, ans){
+  if(card.type==="mc"||card.type==="tf"){
+    const corr = Array.isArray(card.correct)? card.correct : [card.correct];
+    return corr.includes(ans);
+  } else {
+    const a=(ans||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+    const c=(String(card.correct||"")).toLowerCase().replace(/[^a-z0-9]/g,"");
+    return a && c && a===c;
+  }
+}
+
+function correctText(card){
+  if(card.type==="mc"||card.type==="tf"){
+    const options=(card.type==="tf")? ["True","False"] : (card.choices||[]);
+    const corr = Array.isArray(card.correct)? card.correct : [card.correct];
+    return corr.map(i=> options[i]).join(", ");
+  } else { return String(card.correct||""); }
+}
+
+function markResult(ok){
+  const card=allCards[currentIndex];
+  stats.seen++; 
+  if(ok){ stats.correct++; stats.known.add(card.id); wrongBucket.delete(card.id); }
+  else { stats.wrong++; wrongBucket.add(card.id); const pos=Math.min(3,activeQueue.length); activeQueue.splice(pos,0,currentIndex); }
+  saveState();
+}
+
+// Events
+$("#modeLearn").addEventListener("click", ()=>{ stats.mode="learn"; saveState(); });
+$("#modeExam").addEventListener("click", ()=>{ stats.mode="exam"; saveState(); });
+$("#orderSel").addEventListener("change", e=>{ stats.order=e.target.value; activeQueue=[]; saveState(); });
+$("#categoryFilter").addEventListener("change", e=>{ stats.cat=e.target.value; activeQueue=[]; saveState(); });
+
+$("#btnStart").addEventListener("click", ()=>{ if(activeQueue.length===0) applyFilterSort(); pickNext(); });
+$("#btnReset").addEventListener("click", ()=>{
+  if(!confirm("Reset progress (keep deck)?")) return;
+  stats.seen=0; stats.correct=0; stats.wrong=0; stats.known=new Set(); wrongBucket=new Set(); activeQueue=[]; currentIndex=null; saveState(); renderQuestion(null);
+});
+$("#btnReviewWrong").addEventListener("click", ()=>{
+  const wr = allCards.map((c,i)=> wrongBucket.has(c.id)? i:-1).filter(i=>i>=0);
+  if(!wr.length){ alert("No unknowns right now — nice!"); return; }
+  activeQueue = wr.slice(); shuffle(activeQueue); pickNext();
+});
+
+$("#btnCheck").addEventListener("click", ()=>{
+  if(currentIndex===null) return;
+  const card=allCards[currentIndex];
+  const ans=getUserAnswer(card);
+  if(ans===null || ans===undefined || ans===""){ alert("Select or enter an answer first."); return; }
+  const ok=isCorrect(card, ans);
+  const fb=$("#feedbackBanner"); const corr=correctText(card);
+  let expl=(card.explain||"").trim();
+  if(needsBetter(expl)) expl = genInstructorExplanation(card);
+  if(ok){
+    fb.innerHTML = `<strong>✅ Correct.</strong>`;
+  } else {
+    fb.innerHTML = `<strong>❌ Incorrect.</strong><br><strong>Correct Answer:</strong> <em>${corr}</em><br><strong>Explanation:</strong> ${expl}`;
+  }
+  fb.classList.remove("hidden");
+  markResult(!!ok);
+  $("#btnNext").classList.remove("hidden");
+});
+
+$("#btnNext").addEventListener("click", ()=>{ $("#btnNext").classList.add("hidden"); pickNext(); });
+$("#btnSkip").addEventListener("click", ()=>{ if(currentIndex===null) return; activeQueue.push(currentIndex); pickNext(); });
+$("#btnShow").addEventListener("click", ()=>{
+  if(currentIndex===null) return;
+  const card=allCards[currentIndex]; const corr=correctText(card); const fb=$("#feedbackBanner"); const one=(card.explain||"").trim();
+  fb.innerHTML = `<strong>Answer:</strong> <em>${corr}</em>${ one? ' — '+one:'' }`; fb.classList.remove("hidden");
+});
+
+// Import/Export
+$("#btnImport").addEventListener("click", async ()=>{
+  const status=$("#importStatus"); status.textContent = "Starting import…";
+  const f = $("#fileInput").files[0];
+  if(!f){ alert("Choose a .json or .csv file first."); status.textContent="No file."; return; }
+  const replace = $("#replaceChk").checked;
+  let text; try{ text = await f.text(); } catch(e){ alert("Could not read file: "+e.message); status.textContent="Read error."; return; }
+  let added=0;
+  if(replace){ allCards=[]; stats.seen=0; stats.correct=0; stats.wrong=0; stats.known=new Set(); wrongBucket=new Set(); activeQueue=[]; currentIndex=null; }
+  const lower=f.name.toLowerCase();
+
+  try{
+    if(lower.endsWith(".json")){
+      let arr = JSON.parse(text);
+      if(!Array.isArray(arr) && arr && Array.isArray(arr.cards)) arr = arr.cards;
+      if(!Array.isArray(arr)) throw new Error("JSON must be an array of cards or {cards:[...]}");
+      arr.forEach(obj=>{
+        if(!obj || !obj.q) return;
+        const card={ id:uuid(), q:obj.q, explain:obj.explain||"", cat:obj.cat||"Imported" };
+        if(obj.type==="mc" || (obj.choices && obj.choices.length)){ card.type="mc"; card.choices=obj.choices||[]; card.correct=obj.correct; }
+        else if(obj.type==="tf"){ card.type="tf"; card.correct=(obj.correct===true || obj.correct===0)?0:1; }
+        else { card.type="free"; card.correct=obj.correct; }
+        allCards.push(card); added++;
+      });
+    } else {
+      const lines=text.split(/\r?\n/).filter(l=>l.trim().length);
+      for(const line of lines){
+        const parts=line.split(",");
+        const [q,choicesText,ans,ex,cat]=parts.map(s=>(s||"").trim());
+        if(!q || !ans) continue;
+        let card={ id:uuid(), q, explain:ex, cat:cat||"Imported" };
+        if(!choicesText){
+          if(/^(true|false)$/i.test(ans)){ card.type="tf"; card.correct=/^true$/i.test(ans)?0:1; } else { card.type="free"; card.correct=ans; }
+        } else {
+          const choices=choicesText.split("||").map(s=>s.trim()).filter(Boolean);
+          card.type="mc"; card.choices=choices;
+          let correctIdx=null; const upper=ans.toUpperCase();
+          if(/^[A-Z]$/.test(upper)){ const idx=upper.charCodeAt(0)-65; if(idx>=0 && idx<choices.length) correctIdx=idx; }
+          if(correctIdx===null){ correctIdx=Math.max(0, choices.findIndex(c=>c.toLowerCase()===ans.toLowerCase())); }
+          card.correct=correctIdx;
+        }
+        allCards.push(card); added++;
+      }
+    }
+  }catch(e){
+    alert("Import failed: "+e.message);
+    status.textContent="Import failed.";
+    return;
+  }
+
+  populateCategoryFilter(); saveState();
+  status.textContent = `Import complete: ${added} cards.`;
+  alert(`Imported ${added} cards.`);
+});
+
+$("#btnExportAll").addEventListener("click", ()=>{
+  const a=document.createElement("a");
+  const cleaned = allCards.map(c=>{ const x={...c}; if(needsFix(x.explain)) x.explain = genInstructorExplanation(x); return x; });a.href=URL.createObjectURL(new Blob([JSON.stringify(cleaned,null,2)],{type:"application/json"}));
+  a.download="oec_all.json"; a.click(); URL.revokeObjectURL(a.href);
+});
+$("#btnExportUnknown").addEventListener("click", ()=>{
+  const unknown = allCards.filter(c=> !stats.known.has(c.id));
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(unknown,null,2)],{type:"application/json"}));
+  a.download="oec_unknown.json"; a.click(); URL.revokeObjectURL(a.href);
+});
+$("#btnClearDeck").addEventListener("click", ()=>{
+  if(!confirm("Delete all cards and reset progress?")) return;
+  allCards=[]; stats.seen=0; stats.correct=0; stats.wrong=0; stats.known=new Set(); wrongBucket=new Set(); activeQueue=[]; currentIndex=null;
+  populateCategoryFilter(); saveState(); renderQuestion(null);
+  alert("Deck cleared.");
+});
+
+
+// === Instructor-style explanation generator ===
+function genInstructorExplanation(card){
+  const q = (card.q||""); const lowq = q.toLowerCase();
+  const opts = (card.type==="tf")? ["True","False"] : (card.choices||[]);
+  const corr = (card.type==="mc"||card.type==="tf") ? (Array.isArray(card.correct)? card.correct : [card.correct]).map(i=>opts[i]).join(", ") : String(card.correct||"");
+  const text = (q + " " + opts.join(" ")).toLowerCase();
+  const isNot = /\bnot\b|\bexcept\b/.test(lowq);
+  const has = (...ks)=> ks.some(k=> text.includes(k.toLowerCase()));
+  const one = (s)=>{ s=(s||"").trim().replace(/\s+/g," "); return s ? (/[.!?]$/.test(s)? s : s+".") : s; };
+
+  // Hypothermia severity
+  if(has("hypothermia")){
+    if(lowq.includes("severe") && /coma/.test(corr.toLowerCase())) return one("Coma marks severe hypothermia because at very low core temperatures shivering stops and level of consciousness can drop to coma");
+    if(lowq.includes("mild") && /shiver/.test(corr.toLowerCase())) return one("Active shivering points to mild hypothermia because the body is still producing heat");
+  }
+  // ICS roles
+  if(has("incident command","ics","incident commander")){
+    if(isNot && /triag|treat/.test(corr.toLowerCase())) return one("Triage belongs to Operations; the incident commander sets objectives and manages the incident, not individual patient triage");
+  }
+  // CAD
+  if(has("coronary artery disease","cad")) return one("Coronary artery disease means the heart’s arteries are narrowed by plaque, reducing blood and oxygen to the heart muscle");
+  // Airway adjuncts
+  if(has("oropharyngeal airway","opa")) return one("An OPA is correct when the flange rests at the lips/teeth and it holds the tongue off the airway without a gag reflex");
+  if(has("nasopharyngeal","npa")) return one("Use an NPA if a gag reflex is present because it passes beside the tongue without triggering vomiting");
+  // Oxygen devices
+  if(has("nonrebreather","non-rebreather","nrb")) return one("Use a non‑rebreather at 12–15 L/min for significant hypoxia; the reservoir must be inflated to deliver high oxygen");
+  if(has("nasal cannula")) return one("A nasal cannula gives low‑flow oxygen for milder cases or when a mask is not tolerated");
+  // Shock/bleeding
+  if(has("tourniquet")) return one("Use a tourniquet early for life‑threatening extremity bleeding because it stops arterial flow when pressure is not enough");
+  if(has("shock","hypoperfusion")) return one("Early shock shows fast pulse and cool, clammy skin as the body pulls blood to the core");
+  // Stroke
+  if(has("stroke","cva","fast")) return one("FAST findings signal stroke; rapid recognition and transport matter because brain cells die without blood flow");
+  // Seizure
+  if(has("seizure")) return one("Protect from injury and maintain airway because the patient cannot control their body or clear secretions");
+  // SMR
+  if(has("spinal motion restriction","smr","c-spine")) return one("Use SMR when mechanism and exam suggest spine injury to prevent cord damage");
+  // Pediatrics
+  if(has("pediatric","infant","child")) return one("Kids have a larger tongue and head and a narrower airway, so adjust positioning and adjunct size");
+  // OB/GYN
+  if(has("vagina","uterus","cervix","menstruation","delivery")) return one("The vagina is the birth canal and path for menstrual blood; the cervix is the doorway to the uterus where a baby grows");
+  // Altitude
+  if(has("ams","hace","hape","altitude")) return one("At altitude: AMS causes headache/nausea, HAPE causes shortness of breath from lung fluid, and HACE causes clumsiness or confusion—oxygen and descent help");
+
+  if(isNot) return one(corr + " is the only option that does not fit the group described in the question");
+  return one(corr + " directly answers what the question is asking");
+}
+function needsBetter(exp){
+  if(!exp) return true;
+  const s = exp.trim().toLowerCase();
+  if(s.length < 8) return true;
+  if(/aligns with oec|key tradeoffs|best fits|pathophysiology/.test(s)) return true;
+  return false;
+}
+
+const THEME_KEY="oec_theme";
+function applyTheme(t){ document.documentElement.classList.toggle("light", t==="light");
+  const btn=document.getElementById("themeToggle"); if(btn){ btn.textContent = (t==="light")? "🌞 Light" : "🌙 Dark"; }}
+const savedTheme = localStorage.getItem(THEME_KEY) || "dark"; applyTheme(savedTheme);
+document.addEventListener("click",(e)=>{ if(e.target && e.target.id==="themeToggle"){ const cur = document.documentElement.classList.contains("light")?"light":"dark"; const next = (cur==="light")?"dark":"light"; localStorage.setItem(THEME_KEY,next); applyTheme(next); } });
+
+// Init
+loadState(); populateCategoryFilter(); renderQuestion(null);
+</script>
+
+<script>
+// Improved legal-friendly explanation fixer (adds to existing behavior)
+(function(){
+  if(typeof genInstructorExplanation!=="function") return;
+  const oldGen = genInstructorExplanation;
+  window.genInstructorExplanation = function(card){
+    const q=(card.q||"").toLowerCase();
+    const corr = (function(){
+      if(card.type==="mc"||card.type==="tf"){
+        const opts=(card.type==="tf")? ["True","False"] : (card.choices||[]);
+        const arr = Array.isArray(card.correct)? card.correct : [card.correct];
+        return arr.map(i=>opts[i]).join(", ");
+      } else { return String(card.correct||""); }
+    })();
+    const cL = corr.toLowerCase();
+    // Legal topics that need real explanations
+    if(/assault|battery|abandonment|negligence|false imprisonment|consent|scope of practice|duty to act/.test(q + " " + cL)){
+      if(/battery/.test(cL)) return "Battery is unwanted physical contact without permission, so if the stem describes touching/treating without consent, battery is the correct term.";
+      if(/assault/.test(cL)) return "Assault is causing a person to fear immediate harm without touching them.";
+      if(/false imprisonment/.test(cL)) return "False imprisonment is restraining or transporting someone without legal authority or consent.";
+      if(/abandonment/.test(cL)) return "Abandonment is leaving a patient after you start care without transferring to equal or higher care.";
+      if(/negligence/.test(cL)) return "Negligence means you had a duty, breached it, that breach caused harm, and the patient was damaged.";
+      if(/implied consent|consent/.test(cL)) return "Use consent when a competent patient agrees; use implied consent only if the patient cannot consent and it’s an emergency.";
+      if(/scope of practice/.test(cL)) return "Scope of practice is what you’re trained and authorized to do; acting outside it isn’t allowed.";
+      if(/duty to act/.test(cL)) return "Duty to act exists when you are on duty or otherwise obligated to provide care.";
+    }
+    // Make fallback less robotic
+    const base = oldGen(card);
+    if(/directly answers what the question is asking/i.test(base) || base.trim().length<12){
+      if(corr && corr.split(" ").length<=3) return "Choose " + corr + " because it best matches the situation described in the question.";
+      return (corr? corr + " is correct because it matches the condition described." : "This option matches the condition described.") ;
+    }
+    return base;
+  };
+})();
+</script>
+
+</body>
+</html>

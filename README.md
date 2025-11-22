@@ -1,6 +1,6 @@
 # OEC Study Trainer
 
-A lightweight, Shepard-style study tool for **Outdoor Emergency Care (OEC)** prep. It runs as a single static HTML file and supports custom JSON decks. Missed items go back in the queue (“see it again”), known items move to the Known bin—just like Shepard Air.
+A lightweight, study tool for **Outdoor Emergency Care (OEC)** prep. It runs as a single static HTML file and supports custom JSON decks. Missed items go back in the queue (“see it again”), known items move to the Known bin.
 
 > **Why this exists:** Fast, offline-friendly drilling with concise, instructor-style explanations tuned for OEC/EMS topics (hypothermia, ICS, legal, airway/oxygen, shock, neuro, and acronym expansions).
 

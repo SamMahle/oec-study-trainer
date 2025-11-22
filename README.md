@@ -8,7 +8,7 @@ A lightweight, Shepard-style study tool for **Outdoor Emergency Care (OEC)** pre
 
 ## Features
 
-- **Shepard-style flow:** `See it again` for misses, `I knew it` for hits
+- **Better study flow:** `See it again` for misses, `I knew it` for hits
 - **Learn / Exam modes:** Peek in Learn; hide until answered in Exam
 - **Import / Export:** Load your own JSON; `Export All` writes a cleaned deck
 - **Light / Dark themes:** Toggle in the header; persisted in localStorage
